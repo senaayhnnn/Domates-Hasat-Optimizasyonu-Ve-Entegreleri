@@ -1,0 +1,377 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bombus - Ana Sayfa</title>
+
+  <style>
+    /* Temel reset */
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background-color: #f5f6fa;
+      color: #004d40;
+      position: relative;
+      padding-bottom: 60px; /* Footer alanı için */
+    }
+
+    /* Topbar */
+    header {
+      display: flex;
+      align-items: center;
+      padding: 15px 30px;
+      background: #004d40;
+      color: white;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    /* Logo kutuları */
+    .logo-left,
+    .logo-right {
+      background-color: #004d40;
+      padding: 5px 12px;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      display: inline-block;
+    }
+
+    /* Logo görselleri */
+    .logo-left img,
+    .logo-right img {
+      height: 80px;
+      display: block;
+      filter: drop-shadow(0 0 2px rgba(0,0,0,0.15));
+    }
+
+    /* Ana Sayfa linki (logoya daha yakın) */
+    .nav-home {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: white;
+      text-decoration: none;
+      transition: color 0.3s ease;
+      align-self: center;
+      margin-left: 30px;
+      margin-right: 15px;
+      white-space: nowrap;
+    }
+
+    .nav-home:hover {
+      text-decoration: underline;
+      color: #80cbc4;
+    }
+
+    /* Tüm butonlar tek satırda */
+    .auth-center {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: nowrap;
+    }
+
+    /* Ortak buton stili */
+    .auth-button {
+      background-color: #009688;
+      color: white;
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 1rem;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .auth-button:hover {
+      background-color: #00796b;
+    }
+
+    /* Arama butonu daha küçük */
+    .search-button {
+      background-color: #00796b;
+      padding: 8px 12px;
+      font-size: 1.2rem;
+    }
+
+    /* AGROCULUS butonu yeşil oldu */
+    .agroculus-link {
+      background-color: #009688;
+      font-weight: 700;
+      font-size: 1.1rem;
+      text-transform: uppercase;
+    }
+
+    .agroculus-link:hover {
+      background-color: #00796b;
+    }
+
+    main {
+      padding: 40px 30px;
+      background: #e0f2f1;
+      color: #004d40;
+      max-width: 900px;
+      margin: 30px auto 100px auto;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    main img {
+      max-width: 100%;
+      height: auto;
+      margin-top: 20px;
+      border-radius: 8px;
+    }
+
+    footer {
+      background: #004d40;
+      color: white;
+      padding: 20px 30px;
+      text-align: center;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      box-shadow: 0 -2px 8px rgba(0,0,0,0.3);
+      z-index: 1000;
+    }
+
+    footer .social-icons {
+      margin-top: 10px;
+    }
+
+    footer .social-icons a {
+      color: white;
+      margin: 0 10px;
+      font-size: 1.5rem;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    footer .social-icons a:hover {
+      color: #80cbc4;
+    }
+
+    @media(max-width: 600px) {
+      header {
+        justify-content: center;
+      }
+
+      .logo-left, .logo-right {
+        padding: 3px 8px;
+      }
+
+      .nav-home {
+        margin: 10px 0;
+      }
+
+      .auth-center {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .auth-button {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+      }
+    }
+
+    /* Chatbot sağ alt köşeye sabitlendi */
+    #chatbot {
+      position: fixed;
+      bottom: 80px;
+      right: 30px;
+      width: 320px;
+      max-width: 90vw;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      z-index: 1500;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    #chat-messages {
+      height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 6px;
+      background: #f9f9f9;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 0.95rem;
+    }
+
+    #chat-messages div {
+      max-width: 80%;
+      padding: 8px 12px;
+      border-radius: 8px;
+      word-wrap: break-word;
+    }
+
+    #chat-messages div.user-message {
+      background-color: #004d40;
+      color: white;
+      align-self: flex-end;
+      margin-left: auto;
+    }
+
+    #chat-messages div.bot-message {
+      background-color: #80cbc4;
+      color: #004d40;
+      align-self: flex-start;
+      margin-right: auto;
+    }
+
+    #chat-form {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+    }
+
+    #chat-input {
+      flex-grow: 1;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+
+    #chat-form button {
+      background: #004d40;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+    }
+
+    #chat-form button:hover {
+      background: #00332f;
+    }
+  </style>
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  />
+</head>
+<body>
+
+  <header>
+    <div class="logo-left">
+      <img src="{% static 'pages/tarim1-removebg-preview.png' %}" alt="Bombus Logo" />
+    </div>
+
+    <a href="/" class="nav-home">Ana Sayfa</a>
+
+    <nav class="auth-center" aria-label="Kullanıcı menüsü ve navigasyon">
+      <a href="/login" class="auth-button">Giriş Yap</a>
+      <a href="/register" class="auth-button">Üye Ol</a>
+      <a href="/search" class="auth-button search-button" aria-label="Ara">
+        <i class="fas fa-search"></i>
+      </a>
+      <a href="{% url 'agroculus' %}" class="auth-button agroculus-link">AGROCULUS</a>
+    </nav>
+
+    <div class="logo-right">
+      <img src="{% static 'pages/bombus-removebg-preview.png' %}" alt="Agroculus Logo" />
+    </div>
+  </header>
+
+  <main>
+    <h1>Ana Sayfaya Hoşgeldiniz</h1>
+    <img src="{% static 'pages/arkaresim.jpg' %}" alt="Hoşgeldiniz Fotoğrafı" />
+    <p><!-- İçerik buraya --></p>
+  </main>
+
+  <footer>
+    <p>Contact us: info@bombus.com | +90 555 123 45 67</p>
+    <div class="social-icons" aria-label="Sosyal Medya">
+      <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+      <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+      <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+      <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+    </div>
+  </footer>
+
+  <!-- Chatbot sağ alt köşede -->
+  <section id="chatbot" aria-label="Chatbot">
+    <div id="chat-messages" aria-live="polite" aria-atomic="false" role="log"></div>
+    <form id="chat-form" aria-label="Chat form">
+      <input
+        id="chat-input"
+        type="text"
+        placeholder="Mesajınızı yazın..."
+        autocomplete="off"
+        required
+        aria-required="true"
+        aria-describedby="chatHelp"
+      />
+      <button type="submit" aria-label="Gönder">Gönder</button>
+    </form>
+  </section>
+
+  <script>
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('chat-input');
+    const chatMessages = document.getElementById('chat-messages');
+
+    function addMessage(sender, text) {
+      const msgDiv = document.createElement('div');
+      msgDiv.textContent = text;
+      msgDiv.classList.add(sender === 'user' ? 'user-message' : 'bot-message');
+      chatMessages.appendChild(msgDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    chatForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const message = chatInput.value.trim();
+      if (!message) return;
+
+      addMessage('user', message);
+      chatInput.value = '';
+      chatInput.disabled = true;
+
+      try {
+        const response = await fetch('/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Sunucudan cevap alınamadı.');
+        }
+
+        const data = await response.json();
+        addMessage('bot', data.reply || 'Bir hata oluştu.');
+      } catch (error) {
+        addMessage('bot', 'Hata: ' + error.message);
+      } finally {
+        chatInput.disabled = false;
+        chatInput.focus();
+      }
+    });
+  </script>
+</body>
+</html>

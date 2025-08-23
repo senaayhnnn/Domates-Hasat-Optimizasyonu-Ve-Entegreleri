@@ -1,0 +1,78 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Agroculus Page{% endblock %}</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        header {
+            width: 100%;
+            background-color: #2e7d32; /* Yeşil */
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        footer {
+            width: 100%;
+            background-color: #2e7d32; /* Yeşil */
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 14px;
+            margin-top: auto;
+        }
+
+        main {
+            flex: 1;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ÜST YEŞİL ŞERİT -->
+    <header>
+        Agroculus - Hasat Optimizasyonu
+    </header>
+
+    <!-- ANA İÇERİK -->
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- ALT YEŞİL ŞERİT -->
+    <footer>
+        &copy; 2025 Agroculus | Tüm Hakları Saklıdır
+    </footer>
+
+    <!-- JavaScript ile sağ tık logo yönlendirmesi (şimdilik logo yok ama eklersen çalışır) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const logo = document.getElementById('logo');
+            if (logo) {
+                logo.addEventListener('contextmenu', function (event) {
+                    event.preventDefault(); // Sağ tık menüsünü engelle
+                    window.location.href = "{% url 'agroculus' %}";
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,59 @@
+.auth-center {
+  display: flex;
+  align-items: center;
+  gap: 15px;  /* Butonlar arası boşluk */
+  flex-wrap: nowrap; /* tek satırda kalmasını sağlar */
+}
+
+/* Ortak buton stili */
+.auth-button {
+  background-color: #009688;
+  color: white;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+  white-space: nowrap;
+}
+
+.auth-button:hover {
+  background-color: #00796b;
+}
+
+/* Arama butonu için biraz daha küçük ve simge odaklı */
+.search-button {
+  background-color: #00796b;
+  padding: 8px 12px;
+  font-size: 1.2rem;
+}
+
+/* Agroculus butonu siyah arka plan */
+.agroculus-link {
+  background-color: black;
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-transform: uppercase;
+}
+
+.agroculus-link:hover {
+  background-color: #222;
+}
+
+/* Responsive: Küçük ekranlarda düzensiz olmasın diye küçültme */
+@media(max-width: 600px) {
+  .auth-center {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .auth-button {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+}
