@@ -1,78 +1,158 @@
 {% load static %}
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <title>{% block title %}Agroculus Page{% endblock %}</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Bombus - Ana Sayfa{% endblock %}</title>
     <style>
+        /* Ana tasarımın tüm CSS kodları buraya gelecek */
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
         body {
-            margin: 0;
-            padding: 0;
+            display: flex; flex-direction: column;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            background-color: white;
-            font-family: Arial, sans-serif;
+            background-color: #f5f6fa;
+            color: #004d40;
         }
-
         header {
-            width: 100%;
-            background-color: #2e7d32; /* Yeşil */
+            display: flex; align-items: center;
+            padding: 15px 30px;
+            background: #004d40;
             color: white;
-            padding: 20px;
-            text-align: center;
-            font-size: 24px;
-            font-weight: bold;
-            letter-spacing: 1px;
         }
-
-        footer {
-            width: 100%;
-            background-color: #2e7d32; /* Yeşil */
-            color: white;
-            padding: 15px;
-            text-align: center;
-            font-size: 14px;
-            margin-top: auto;
+        .logo-left, .logo-right {
+            background-color: #004d40;
+            padding: 5px 12px;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            display: inline-block;
         }
-
+        .logo-left img, .logo-right img {
+            height: 80px; display: block;
+            filter: drop-shadow(0 0 2px rgba(0,0,0,0.15));
+        }
+        .nav-home {
+            margin-left: 30px; font-weight: 600; font-size: 1.1rem;
+            color: white; text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .nav-home:hover {
+            text-decoration: underline; color: #80cbc4;
+        }
+        .auth-center {
+            flex: 1; display: flex; justify-content: center; gap: 30px;
+        }
+        .auth-buttons {
+            display: flex; gap: 20px; align-items: center;
+        }
+        .auth-buttons a, .auth-buttons .user-welcome {
+            background-color: #009688; color: white;
+            padding: 8px 18px; border-radius: 20px;
+            font-weight: 600; font-size: 1rem;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .auth-buttons a:hover {
+            background-color: #00796b;
+        }
+        .user-welcome {
+            background: none; color: white; font-weight: 600; font-size: 1rem;
+            padding: 0;
+            margin-right: 10px;
+        }
+        .logout-btn {
+            background-color: #d32f2f;
+        }
+        .logout-btn:hover {
+            background-color: #c62828;
+        }
+        .agroculus-link {
+            background-color: black; color: white;
+            padding: 8px 18px; border-radius: 20px;
+            font-weight: 700; font-size: 1.1rem;
+            text-transform: uppercase; text-decoration: none;
+            display: flex; align-items: center; justify-content: center;
+            transition: background-color 0.3s ease;
+        }
+        .agroculus-link:hover {
+            background-color: #222;
+        }
         main {
-            flex: 1;
-            padding: 20px;
+            flex-grow: 1; padding: 40px 30px;
+            background: #e0f2f1; color: #004d40;
+        }
+        footer {
+            background: #004d40; color: white;
+            padding: 20px 30px; text-align: center;
+        }
+        footer .social-icons {
+            margin-top: 10px;
+        }
+        footer .social-icons a {
+            color: white; margin: 0 10px; font-size: 1.5rem;
+            text-decoration: none; transition: color 0.3s ease;
+        }
+        footer .social-icons a:hover {
+            color: #80cbc4;
+        }
+        @media(max-width: 600px) {
+            header {
+                flex-wrap: wrap; justify-content: center; gap: 15px;
+            }
+            .auth-center {
+                width: 100%; justify-content: center;
+            }
+            .logo-left, .logo-right {
+                padding: 3px 8px;
+            }
+            .nav-home {
+                margin-left: 0;
+            }
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
 <body>
-
-    <!-- ÜST YEŞİL ŞERİT -->
     <header>
-        Agroculus - Hasat Optimizasyonu
+        <div class="logo-left">
+            <img src="{% static 'tarim1-removebg-preview.png' %}" alt="Bombus Logo" />
+        </div>
+        <a href="{% url 'index' %}" class="nav-home">Ana Sayfa</a>
+        <div class="auth-center">
+            <div class="auth-buttons">
+                {% if request.user.is_authenticated %}
+                    <span class="user-welcome">Hoş geldin, {{ request.user.username }}!</span>
+                    <a href="{% url 'logout' %}" class="logout-btn">Çıkış Yap</a>
+                    <a href="{% url 'agroculus' %}" class="agroculus-link">AGROCULUS</a>
+                {% else %}
+                    <a href="{% url 'login' %}">Giriş Yap</a>
+                    <a href="{% url 'register' %}">Üye Ol</a>
+                    <a href="{% url 'agroculus' %}" class="agroculus-link">AGROCULUS</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="logo-right">
+            <img src="{% static 'bombus-removebg-preview.png' %}" alt="Agroculus Logo" />
+        </div>
     </header>
 
-    <!-- ANA İÇERİK -->
     <main>
         {% block content %}
         {% endblock %}
     </main>
 
-    <!-- ALT YEŞİL ŞERİT -->
     <footer>
-        &copy; 2025 Agroculus | Tüm Hakları Saklıdır
+        <p>Contact us: info@bombus.com | +90 555 123 45 67</p>
+        <div class="social-icons">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+        </div>
     </footer>
-
-    <!-- JavaScript ile sağ tık logo yönlendirmesi (şimdilik logo yok ama eklersen çalışır) -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const logo = document.getElementById('logo');
-            if (logo) {
-                logo.addEventListener('contextmenu', function (event) {
-                    event.preventDefault(); // Sağ tık menüsünü engelle
-                    window.location.href = "{% url 'agroculus' %}";
-                });
-            }
-        });
-    </script>
-
 </body>
 </html>

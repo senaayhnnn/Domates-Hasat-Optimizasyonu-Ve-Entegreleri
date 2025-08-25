@@ -1,0 +1,161 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block content %}
+    <style>
+        /* login.html için özel CSS stilleri buraya gelecek */
+        /* Yüz tanıma bileşenlerinin stilleri */
+        .login-container { 
+            background: #fff; 
+            padding: 40px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+            max-width: 600px; 
+            width: 100%; 
+        }
+        .video-container { 
+            position: relative; 
+            width: 100%; 
+            max-width: 640px; 
+            height: auto; 
+            margin-bottom: 20px; 
+            border-radius: 8px; 
+            overflow: hidden; 
+        }
+        #video { 
+            width: 100%; 
+            height: auto; 
+            display: block; 
+        }
+        canvas { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+        }
+        h1 { 
+            margin-bottom: 20px; 
+            color: #004d40; 
+        }
+        .status-message { 
+            margin-top: 20px; 
+            font-size: 1.1rem; 
+            font-weight: 600; 
+            color: #004d40; 
+        }
+        .btn { 
+            background-color: #009688; 
+            color: white; 
+            padding: 12px 24px; 
+            border: none; 
+            border-radius: 25px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 1rem; 
+            transition: background-color 0.3s ease, transform 0.2s ease; 
+        }
+        .btn:hover { 
+            background-color: #00796b; 
+            transform: translateY(-2px); 
+        }
+
+        /* Geleneksel form için stiller */
+        #traditional-login-form {
+            display: none; /* Başlangıçta gizli */
+            margin-top: 20px;
+            text-align: left;
+        }
+        #traditional-login-form input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    </style>
+    <div class="login-container">
+        <div id="face-login-section">
+            <h1>Yüz Tanıma ile Giriş Yap</h1>
+            <p>Lütfen yüzünüzü kamera kadrajına yerleştirin.</p>
+            <div class="video-container">
+                <video id="video" autoplay muted></video>
+                <canvas id="canvas"></canvas>
+            </div>
+            <div class="status-message" id="status">Kamera bekleniyor...</div>
+            <button class="btn" onclick="startRecognition()">Giriş Yap</button>
+        </div>
+
+        <div id="traditional-login-form">
+            <h1>Giriş Yap</h1>
+            <p>Yüzünüz tanınamadı. Lütfen kullanıcı adı ve şifrenizle giriş yapın.</p>
+            <form action="{% url 'login' %}" method="post">
+                {% csrf_token %}
+                <input type="text" name="username" placeholder="Kullanıcı Adı" required>
+                <input type="password" name="password" placeholder="Şifre" required>
+                <button type="submit" class="btn">Giriş Yap</button>
+            </form>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.js"></script>
+    <script>
+        const video = document.getElementById('video');
+        const statusEl = document.getElementById('status');
+        const btn = document.querySelector('.btn');
+        const faceLoginSection = document.getElementById('face-login-section');
+        const traditionalForm = document.getElementById('traditional-login-form');
+    
+        async function startVideo() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
+                video.srcObject = stream;
+                statusEl.innerText = 'Kamera açıldı, modeller yükleniyor...';
+                
+                await faceapi.nets.tinyFaceDetector.loadFromUri('{% static "models" %}');
+                await faceapi.nets.faceLandmark68Net.loadFromUri('{% static "models" %}');
+                await faceapi.nets.faceRecognitionNet.loadFromUri('{% static "models" %}');
+    
+                statusEl.innerText = 'Modeller yüklendi. Yüzünüzü giriş yapmak için kameraya çevirin.';
+                btn.style.display = 'block';
+            } catch (err) {
+                console.error("Kamera erişim hatası:", err);
+                statusEl.innerText = 'Hata: Kamera erişimi reddedildi veya bulunamadı.';
+                btn.style.display = 'none';
+            }
+        }
+    
+        async function startRecognition() {
+            statusEl.innerText = 'Yüzünüz taranıyor...';
+            const detections = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
+    
+            if (detections) {
+                const faceDescriptor = detections.descriptor;
+                
+                fetch('{% url "login_with_face" %}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+                    body: JSON.stringify({ face_embedding: Array.from(faceDescriptor) })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        statusEl.innerText = 'Giriş Başarılı! Yönlendiriliyorsunuz...';
+                        window.location.href = "{% url 'agroculus' %}"; 
+                    } else {
+                        statusEl.innerText = 'Yüz eşleşmedi.';
+                        faceLoginSection.style.display = 'none';
+                        traditionalForm.style.display = 'block';
+                    }
+                })
+                .catch(err => {
+                    console.error('Backend ile iletişim hatası:', err);
+                    statusEl.innerText = 'Sunucuya bağlanırken bir hata oluştu.';
+                });
+    
+            } else {
+                statusEl.innerText = 'Kadrajda yüz bulunamadı. Lütfen tekrar deneyin.';
+            }
+        }
+    
+        window.onload = startVideo;
+    </script>
+{% endblock %}

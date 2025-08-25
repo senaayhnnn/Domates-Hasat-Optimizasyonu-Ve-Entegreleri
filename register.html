@@ -1,0 +1,131 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block content %}
+    <style>
+        /* CSS kodlarınız burada kalacak */
+        /* Ek olarak geleneksel form için stiller */
+        #traditional-register-form {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ccc;
+            text-align: center;
+        }
+        #traditional-register-form input {
+            width: 80%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .btn-register-traditional {
+            background-color: #004d40;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: background-color 0.3s ease, transform 0.2s ease; 
+        }
+        .btn-register-traditional:hover {
+            background-color: #00332c;
+            transform: translateY(-2px);
+        }
+    </style>
+
+    <div class="login-container">
+        <div id="face-register-section">
+            <h1>Yüzünüzü Kaydedin</h1>
+            <p>Lütfen kullanıcı adınızı girin ve kameraya bakın.</p>
+            <div class="video-container">
+                <video id="video" autoplay muted></video>
+                <canvas id="canvas"></canvas>
+            </div>
+            <input type="text" id="username-input" placeholder="Kullanıcı Adı" style="padding:10px; border-radius:8px; border:1px solid #ccc; width:100%; margin-bottom:20px;">
+            <div class="status-message" id="status">Kamera bekleniyor...</div>
+            <button class="btn" onclick="registerFace()">Yüzümü Kaydet</button>
+        </div>
+
+        <div id="traditional-register-form">
+            <h2>Veya Kullanıcı Adı ve Şifre ile Kayıt Olun</h2>
+            <form method="post" action="{% url 'register' %}">
+                {% csrf_token %}
+                <input type="text" name="username" placeholder="Kullanıcı Adı" required>
+                <input type="password" name="password" placeholder="Şifre" required>
+                <button type="submit" class="btn-register-traditional">Kayıt Ol</button>
+            </form>
+            
+            {% if error_message %}
+                <p style="color: red; margin-top: 15px;">{{ error_message }}</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.js"></script>
+    <script>
+        const video = document.getElementById('video');
+        const statusEl = document.getElementById('status');
+        const btn = document.querySelector('.btn');
+        const usernameInput = document.getElementById('username-input');
+
+        async function startVideo() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
+                video.srcObject = stream;
+                statusEl.innerText = 'Kamera açıldı, modeller yükleniyor...';
+                
+                await faceapi.nets.tinyFaceDetector.loadFromUri('{% static "models" %}');
+                await faceapi.nets.faceLandmark68Net.loadFromUri('{% static "models" %}');
+                await faceapi.nets.faceRecognitionNet.loadFromUri('{% static "models" %}');
+
+                statusEl.innerText = 'Modeller yüklendi. Yüzünüzü kaydetmek için kameraya çevirin.';
+                btn.style.display = 'block';
+            } catch (err) {
+                console.error("Kamera erişim hatası:", err);
+                statusEl.innerText = 'Hata: Kamera erişimi reddedildi veya bulunamadı.';
+                btn.style.display = 'none';
+            }
+        }
+
+        async function registerFace() {
+            const username = usernameInput.value;
+            if (!username) {
+                alert('Lütfen bir kullanıcı adı girin.');
+                return;
+            }
+
+            statusEl.innerText = 'Yüzünüz taranıyor ve kaydediliyor...';
+            const detections = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
+
+            if (detections) {
+                const faceDescriptor = detections.descriptor;
+                
+                fetch('{% url "register_face" %}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+                    body: JSON.stringify({ username: username, face_embedding: Array.from(faceDescriptor) })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Kayıt Başarılı!');
+                        window.location.href = "{% url 'login' %}";
+                    } else {
+                        statusEl.innerText = 'Hata: ' + data.error;
+                    }
+                })
+                .catch(err => {
+                    console.error('Backend ile iletişim hatası:', err);
+                    statusEl.innerText = 'Sunucuya bağlanırken bir hata oluştu.';
+                });
+
+            } else {
+                statusEl.innerText = 'Kadrajda yüz bulunamadı. Lütfen kameraya doğru bakın.';
+            }
+        }
+
+        window.onload = startVideo;
+    </script>
+{% endblock %}
